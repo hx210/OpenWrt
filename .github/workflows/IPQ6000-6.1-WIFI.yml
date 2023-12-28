@@ -69,6 +69,19 @@ jobs:
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
+        REPLACE_REPO="https://github.com/openwrt/openwrt"
+        REPO_REPO_PATH="$PWD/RP_REPO"
+        git clone --depth 1 ${REPLACE_REPO} "${REPO_REPO_PATH}"
+        REPLACE_PATH_LIST="package/system package/network/config package/firmware/linux-firmware package/utils toolchain tools package/base-files"
+        SOURCE_PATH=$PWD
+        for i in ${REPLACE_PATH_LIST}; do
+            echo "${i}"
+            if [ -d "${SOURCE_PATH}/${i}" ]; then
+                rm -rf "${SOURCE_PATH:?}/${i}" && mkdir "${SOURCE_PATH:?}/${i}" && mv "${REPO_REPO_PATH}/${i}/"* "${SOURCE_PATH}/${i}"
+            fi
+        done
+        cat "${SOURCE_PATH}/package/network/config/netifd/Makefile"
+        rm -rf "${REPO_REPO_PATH}"        
 
     - name: Generate Variables
       run: |
