@@ -9,7 +9,7 @@ env:
   REPO_URL: https://github.com/breeze303/ipq6000-6.1-nss
   REPO_BRANCH: main
   FEEDS_CONF: feeds/ipq6000-6.1.default
-  CONFIG_FILE: configs/ipq6000-6.1-wifi.config
+  CONFIG_FILE: configs/dest.config
   DIY_SCRIPT: diy-script.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
@@ -117,10 +117,6 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/scripts/*.sh
         chmod +x $DIY_SCRIPT
         cd $OPENWRT_PATH
-        $GITHUB_WORKSPACE/$DIY_SCRIPT
-        $GITHUB_WORKSPACE/scripts/preset-clash-core.sh $CLASH_KERNEL
-        $GITHUB_WORKSPACE/scripts/preset-terminal-tools.sh
-        $GITHUB_WORKSPACE/scripts/preset-adguard-core.sh $CLASH_KERNEL
 
     - name: Download DL Package
       run: |
