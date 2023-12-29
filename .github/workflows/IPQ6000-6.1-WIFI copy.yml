@@ -118,6 +118,13 @@ jobs:
           find dl -size -1024c -exec ls -l {} \;
           find dl -size -1024c -exec rm -f {} \;
 
+      - name: root权限编译
+        run: |
+          export FORCE_UNSAFE_CONFIGURE=1
+          if [[ $(id -u) -eq 0 ]]; then
+              echo "FORCE_UNSAFE_CONFIGURE=$FORCE_UNSAFE_CONFIGURE" >>$GITHUB_ENV
+          fi
+
       - name: Compile Firmware
         id: compile
         run: |
