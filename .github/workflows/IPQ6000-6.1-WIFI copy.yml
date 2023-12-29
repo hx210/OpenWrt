@@ -23,9 +23,9 @@ jobs:
     runs-on: ubuntu-22.04
     container:
       image: alpine:latest
-      defaults:
-        run:
-          shell: bash
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Initialization Environment
         env:
