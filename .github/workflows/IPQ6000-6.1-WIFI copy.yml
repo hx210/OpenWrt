@@ -28,8 +28,7 @@ jobs:
         shell: bash
     steps:
       - name: Initialization Environment
-        env:
-          DEBIAN_FRONTEND: noninteractive
+        shell: sh
         run: |
           apk add argp-standalone asciidoc bash bc binutils bzip2 cdrkit coreutils \
           diffutils elfutils-dev findutils flex musl-fts-dev g++ gawk gcc gettext git \
