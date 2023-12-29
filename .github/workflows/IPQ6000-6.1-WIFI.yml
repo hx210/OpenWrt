@@ -9,7 +9,7 @@ env:
   REPO_URL: https://github.com/breeze303/ipq6000-6.1-nss
   REPO_BRANCH: main
   FEEDS_CONF: feeds/ipq6000-6.1.default
-  CONFIG_FILE: configs/ipq6000-6.1-wifi.config
+  CONFIG_FILE: configs/dest.config
   DIY_SCRIPT: diy-script.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
