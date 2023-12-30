@@ -111,6 +111,7 @@ jobs:
           cd $OPENWRT_PATH
           python3 $GITHUB_WORKSPACE/scripts/xiugai.py
           make defconfig
+          sed -i 's/Os/O2 -Wl,--gc-sections/g' include/target.mk
 
       - name: Download DL Package
         run: |
