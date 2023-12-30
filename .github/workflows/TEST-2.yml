@@ -1,4 +1,4 @@
-name: IPQ6000-6.1
+name: test-2
 
 on:
   workflow_dispatch:
@@ -6,16 +6,16 @@ on:
     - cron: 0 19 * * *
 
 env:
-  REPO_URL: https://github.com/breeze303/ipq6000-6.1-nss
-  REPO_BRANCH: main
-  FEEDS_CONF: feeds/ipq6000-6.1.default
+  REPO_URL: https://github.com/breeze303/ipq60xx-6.1.git
+  REPO_BRANCH: ipq60xx-devel_nss
+  FEEDS_CONF: feeds/test.default
   CONFIG_FILE: configs/ipq6000-6.1.config
   DIY_SCRIPT: diy-script.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   UPLOAD_BIN_DIR: false
   FIRMWARE_RELEASE: true
-  FIRMWARE_TAG: IPQ6000-6.1
+  FIRMWARE_TAG: TEST
   TZ: Asia/Shanghai
 
 jobs:
