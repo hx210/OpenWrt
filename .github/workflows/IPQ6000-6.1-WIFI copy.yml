@@ -109,8 +109,8 @@ jobs:
           chmod +x $GITHUB_WORKSPACE/scripts/*.sh
           chmod +x $DIY_SCRIPT
           cd $OPENWRT_PATH
-          make defconfig
           python3 $GITHUB_WORKSPACE/scripts/xiugai.py
+          make defconfig
 
       - name: Download DL Package
         run: |

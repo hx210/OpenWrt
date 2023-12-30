@@ -19,4 +19,26 @@ def 禁用软件包(file):
 
 文件路径 = os.getenv("OPENWRT_PATH")
 
-禁用软件包(f"{文件路径}/.config")
+# 禁用软件包(f"{文件路径}/.config")
+
+
+def 删除依赖项(file):
+    处理依赖_状态 = False
+    with open(file, "r", encoding="UTF-8") as f1, open(
+        "%s.bak" % file, "w+", encoding="UTF-8", newline="\n"
+    ) as f2:
+        for line in f1:
+            if re.search("LUCI_DEPENDS:=", line):
+                处理依赖_状态 = True
+            elif 处理依赖_状态:
+                if re.search(":=", line):
+                    处理依赖_状态 = False
+                else:
+                    line = re.sub("\+uhttpd-mod-ubus", "+luci", line)
+                    line = re.sub("\+uhttpd", "+luci-compat", line)
+            f2.write(line)
+    os.remove(file)
+    os.rename("%s.bak" % file, file)
+
+
+删除依赖项(f"{文件路径}/feeds/luci/collections/luci-light/Makefile")
