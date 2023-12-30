@@ -34,7 +34,7 @@ jobs:
           diffutils elfutils-dev findutils flex musl-fts-dev g++ gawk gcc gettext git \
           grep gzip intltool libxslt linux-headers make musl-libintl musl-obstack-dev \
           ncurses-dev openssl-dev patch perl python3-dev rsync tar \
-          unzip util-linux wget zlib-dev sudo pahole
+          unzip util-linux wget zlib-dev sudo pahole aria2 libc-dev
 
       - name: Check Server Performance
         run: |
@@ -130,7 +130,6 @@ jobs:
         run: |
           cd $OPENWRT_PATH
           echo -e "$(nproc) thread compile"
-          make package/qca-nss-clients/{clean,compile} -j$(nproc) V=s
           make -j$(nproc) || make -j1 V=s
           echo "status=success" >> $GITHUB_OUTPUT
           echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
