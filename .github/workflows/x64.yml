@@ -117,6 +117,7 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/scripts/*.sh
         chmod +x $DIY_SCRIPT
         cd $OPENWRT_PATH
+        python3 $GITHUB_WORKSPACE/scripts/xiugai.py
 
     - name: Download DL Package
       run: |
