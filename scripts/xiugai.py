@@ -34,8 +34,8 @@ def 删除依赖项(file):
                 if re.search(":=", line):
                     处理依赖_状态 = False
                 else:
-                    line = re.sub("\+uhttpd-mod-ubus", "+luci", line)
-                    line = re.sub("\+uhttpd", "+luci-compat", line)
+                    line = re.sub("\+uhttpd-mod-ubus", "+kmod-nft-socket", line)
+                    line = re.sub("\+uhttpd", "+kmod-nft-tproxy", line)
             f2.write(line)
     os.remove(file)
     os.rename("%s.bak" % file, file)
