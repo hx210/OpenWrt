@@ -115,7 +115,17 @@ jobs:
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_PATH/.config
         chmod +x $GITHUB_WORKSPACE/scripts/*.sh
         chmod +x $DIY_SCRIPT
-        cd $OPENWRT_PATH
+        cd $OPENWRT_PATH 
+        sed -i 's/Os/O2/g' include/target.mk
+        #LTO/GC
+        # Grub 2
+        sed -i 's,no-lto,no-lto no-gc-sections,g' package/boot/grub2/Makefile
+        # openssl disable LTO
+        sed -i 's,no-mips16 gc-sections,no-mips16 gc-sections no-lto,g' package/libs/openssl/Makefile
+        # nginx
+        sed -i 's,gc-sections,gc-sections no-lto,g' feeds/packages/net/nginx/Makefile
+        # libsodium
+        sed -i 's,no-mips16,no-mips16 no-lto,g' feeds/packages/libs/libsodium/Makefile
 
     - name: Download DL Package
       run: |
