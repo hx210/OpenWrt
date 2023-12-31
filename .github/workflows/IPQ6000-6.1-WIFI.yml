@@ -126,6 +126,7 @@ jobs:
         sed -i 's,gc-sections,gc-sections no-lto,g' feeds/packages/net/nginx/Makefile
         # libsodium
         sed -i 's,no-mips16,no-mips16 no-lto,g' feeds/packages/libs/libsodium/Makefile
+        sed -i 's,default GCC_USE_VERSION_12,default GCC_USE_VERSION_13,g' toolchain/gcc/Config.in
 
     - name: Download DL Package
       run: |
