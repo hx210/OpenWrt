@@ -19,7 +19,7 @@ build_firmware() {
   ./scripts/feeds update -a
   ./scripts/feeds install -a
 
-  cp ${GITHUB_WORKSPACE}/config/test.config .config
+  cp ${GITHUB_WORKSPACE}/configs/test .config
   make defconfig
   make -j$(($(nproc) + 1)) V=e || make -j1 V=sc || exit 1
 
