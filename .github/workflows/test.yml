@@ -29,7 +29,7 @@ jobs:
         - /opt/hostedtoolcache:/opt/hostedtoolcache
     env:
       TZ: Asia/Taipei
-      BUILD_REPO: https://github.com/breeze303/ipq6000-6.1-nss.git
+      BUILD_REPO: https://github.com/breeze303/ipq60xx-6.1.git
       BUILD_PROFILE: ${{ matrix.PROFILE }}
       BACKUP_DL_SRC: ${{ github.event.inputs.backup_dl_src }}
     strategy:

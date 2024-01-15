@@ -1834,6 +1834,7 @@ CONFIG_PACKAGE_libiwinfo-data=y
 # CONFIG_PACKAGE_ipq-wifi-glinet_gl-ax1800 is not set
 # CONFIG_PACKAGE_ipq-wifi-glinet_gl-axt1800 is not set
 # CONFIG_PACKAGE_ipq-wifi-jdc_ax1800-pro is not set
+# CONFIG_PACKAGE_ipq-wifi-linksys_mx4200 is not set
 # CONFIG_PACKAGE_ipq-wifi-netgear_rax120v2 is not set
 # CONFIG_PACKAGE_ipq-wifi-netgear_wax218 is not set
 # CONFIG_PACKAGE_ipq-wifi-netgear_wax620 is not set
@@ -4972,6 +4973,7 @@ CONFIG_PACKAGE_luci-i18n-firewall-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-opkg-lt is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-mr is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-ms is not set
+# CONFIG_PACKAGE_luci-i18n-opkg-nl is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-no is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-pl is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-pt is not set
@@ -4985,7 +4987,15 @@ CONFIG_PACKAGE_luci-i18n-firewall-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-opkg-vi is not set
 CONFIG_PACKAGE_luci-i18n-opkg-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-opkg-zh-tw is not set
+# CONFIG_PACKAGE_luci-i18n-usteer-bn is not set
 # CONFIG_PACKAGE_luci-i18n-usteer-es is not set
+# CONFIG_PACKAGE_luci-i18n-usteer-lt is not set
+# CONFIG_PACKAGE_luci-i18n-usteer-no is not set
+# CONFIG_PACKAGE_luci-i18n-usteer-pl is not set
+# CONFIG_PACKAGE_luci-i18n-usteer-pt-br is not set
+# CONFIG_PACKAGE_luci-i18n-usteer-ru is not set
+CONFIG_PACKAGE_luci-i18n-usteer-zh-cn=y
+# CONFIG_PACKAGE_luci-i18n-usteer-zh-tw is not set
 # end of LuCI
 
 #
