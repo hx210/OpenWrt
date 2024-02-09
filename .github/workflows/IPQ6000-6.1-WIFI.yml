@@ -117,7 +117,7 @@ jobs:
           chmod +x $DIY_SCRIPT
           cd $OPENWRT_PATH
           python3 $GITHUB_WORKSPACE/scripts/xiugai.py
-          sed -i 's/Os/O2/g' include/target.mk
+          sed -i 's/Os/O2 -Wl,--gc-sections/g' include/target.mk
           #LTO/GC
           # Grub 2
           sed -i 's,no-lto,no-lto no-gc-sections,g' package/boot/grub2/Makefile
