@@ -113,7 +113,11 @@ jobs:
           cd $OPENWRT_PATH
           python3 $GITHUB_WORKSPACE/scripts/xiugai.py
           make defconfig
-          #sed -i 's/Os/O2 -Wl,--gc-sections/g' include/target.mk
+          sed -i 's/Os/O2 -Wl,--gc-sections/g' include/target.mk
+          sed -i 's,no-lto,no-lto no-gc-sections,g' package/boot/grub2/Makefile
+          sed -i 's,no-mips16 gc-sections,no-mips16 gc-sections no-lto,g' package/libs/openssl/Makefile
+          sed -i 's,gc-sections,gc-sections no-lto,g' feeds/packages/net/nginx/Makefile
+
 
       - name: Download DL Package
         run: |
