@@ -27,6 +27,15 @@ env:
 jobs:
   Build:
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        cp:
+          - 2200000000
+          - 2100000000
+          - 2000000000
+          - 1900000000
+          - 1850000000
 
     steps:
       - name: Check Server Performance
@@ -136,6 +145,7 @@ jobs:
           sed -i 's,default GCC_USE_VERSION_12,default GCC_USE_VERSION_13,g' toolchain/gcc/Config.in
           pushd "target/linux/qualcommax/patches-6.1" || exit
           cp -f $GITHUB_WORKSPACE/patch/ipq6000/* .
+          sed -i 's/2000000000/${{ matrix.cp }}/' 0154-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
           sed -i 's/0x3/0xf/' 0154-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
           sed -i 's/0x1/0xf/' 0154-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
           cat 0154-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
@@ -184,6 +194,11 @@ jobs:
           tar -zcf Packages.tar.gz packages
           rm -rf packages feeds.buildinfo version.buildinfo
           echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
+          wget https://github.com/hx210/nomino/releases/download/dev/nomino-linux-x86_64.zst
+          zstd -d nomino-linux-x86_64.zst
+          sudo cp -f "nomino-linux-x86_64" /usr/local/bin/nomino
+          chmod +x /usr/local/bin/nomino
+          nomino "^(.*)" "${{ matrix.cp }}_{}"
 
       - name: Upload Firmware To Artifact
         if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE != 'true'
