@@ -138,6 +138,7 @@ jobs:
           cp -f $GITHUB_WORKSPACE/patch/ipq6000/* .
           sed -i 's/0x3/0xf/' 0154-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
           sed -i 's/0x1/0xf/' 0154-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
+          cat 0154-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
           popd || exit
 
       - name: Download DL Package
