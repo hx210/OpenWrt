@@ -1,0 +1,67 @@
+From 83f2ab0cf8c72a74bea47c46535a60c2e73c3d94 Mon Sep 17 00:00:00 2001
+From: hx210 <76199340+hx210@users.noreply.github.com>
+Date: Mon, 12 Feb 2024 06:39:07 +0000
+Subject: [PATCH] 6018:step-down overclocking
+
+Signed-off-by: hx210 <76199340+hx210@users.noreply.github.com>
+---
+ arch/arm64/boot/dts/qcom/ipq6018.dtsi | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/ipq6018.dtsi b/arch/arm64/boot/dts/qcom/ipq6018.dtsi
+index 5e1277fea..f7316e4a8 100644
+--- a/arch/arm64/boot/dts/qcom/ipq6018.dtsi
++++ b/arch/arm64/boot/dts/qcom/ipq6018.dtsi
+@@ -102,42 +102,42 @@ cpu_opp_table: opp-table-cpu {
+ 
+ 		opp-864000000 {
+ 			opp-hz = /bits/ 64 <864000000>;
+-			opp-microvolt = <725000>;
++			opp-microvolt = <700000>;
+ 			opp-supported-hw = <0xf>;
+ 			clock-latency-ns = <200000>;
+ 		};
+ 
+ 		opp-1056000000 {
+ 			opp-hz = /bits/ 64 <1056000000>;
+-			opp-microvolt = <787500>;
++			opp-microvolt = <760000>;
+ 			opp-supported-hw = <0xf>;
+ 			clock-latency-ns = <200000>;
+ 		};
+ 
+ 		opp-1320000000 {
+ 			opp-hz = /bits/ 64 <1320000000>;
+-			opp-microvolt = <862500>;
++			opp-microvolt = <835500>;
+ 			opp-supported-hw = <0x3>;
+ 			clock-latency-ns = <200000>;
+ 		};
+ 
+ 		opp-1440000000 {
+ 			opp-hz = /bits/ 64 <1440000000>;
+-			opp-microvolt = <925000>;
++			opp-microvolt = <900000>;
+ 			opp-supported-hw = <0x3>;
+ 			clock-latency-ns = <200000>;
+ 		};
+ 
+ 		opp-1608000000 {
+ 			opp-hz = /bits/ 64 <1608000000>;
+-			opp-microvolt = <987500>;
++			opp-microvolt = <960500>;
+ 			opp-supported-hw = <0x1>;
+ 			clock-latency-ns = <200000>;
+ 		};
+ 
+ 		opp-1800000000 {
+-			opp-hz = /bits/ 64 <1800000000>;
+-			opp-microvolt = <1062500>;
++			opp-hz = /bits/ 64 <2000000000>;
++			opp-microvolt = <1060000>;
+ 			opp-supported-hw = <0x1>;
+ 			clock-latency-ns = <200000>;
+ 		};
+-- 
+2.43.0
+
