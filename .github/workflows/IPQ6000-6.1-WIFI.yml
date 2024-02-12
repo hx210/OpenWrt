@@ -195,9 +195,10 @@ jobs:
           rm -rf packages feeds.buildinfo version.buildinfo
           echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
           wget https://github.com/hx210/nomino/releases/download/dev/nomino-linux-x86_64.zst
-          zstd -d nomino-linux-x86_64.zst
-          sudo cp -f "nomino-linux-x86_64" /usr/local/bin/nomino
-          chmod +x /usr/local/bin/nomino
+          sudo apt-get install -y zstd
+          zstd -d --rm nomino-linux-x86_64.zst
+          chmod +x nomino-linux-x86_64
+          sudo mv -f "nomino-linux-x86_64" /usr/local/bin/nomino
           nomino "^(.*)" "${{ matrix.cp }}_{}"
 
       - name: Upload Firmware To Artifact
