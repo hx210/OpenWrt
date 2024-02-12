@@ -2,6 +2,12 @@ name: IPQ6000-6.1-WIFI
 
 on:
   workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: "Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)"
+        required: false
+        default: false
   schedule:
     - cron: 0 19 * * *
 
@@ -133,7 +139,6 @@ jobs:
           sed -i 's/0x1/0xf/' 0154-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
           cp $GITHUB_WORKSPACE/patch/ipq6000/* .
           popd || exit
-                    
 
       - name: Download DL Package
         run: |
@@ -142,6 +147,10 @@ jobs:
           make download -j8
           find dl -size -1024c -exec ls -l {} \;
           find dl -size -1024c -exec rm -f {} \;
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
 
       - name: Compile Firmware
         id: compile
