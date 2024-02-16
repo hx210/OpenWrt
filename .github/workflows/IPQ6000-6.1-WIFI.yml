@@ -30,12 +30,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        cp_status:
+          - true
         cp:
           - 2200000000
           - 2100000000
           - 2000000000
           - 1900000000
           - 1850000000
+        include:
+          - cp_status: false
 
     steps:
       - name: Check Server Performance
@@ -80,6 +84,8 @@ jobs:
           df -hT $GITHUB_WORKSPACE
           git clone $REPO_URL -b $REPO_BRANCH openwrt
           cd openwrt
+          wget https://github.com/breeze303/ipq60xx-6.1/commit/d59d3a4948ea0526fc7a5d3952c6d9fc1c06c8eb.patch -O 1.patch
+          git apply 1.patch
           echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
           VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
           echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
@@ -144,7 +150,9 @@ jobs:
           sed -i 's,no-mips16,no-mips16 no-lto,g' feeds/packages/libs/libsodium/Makefile
           sed -i 's,default GCC_USE_VERSION_12,default GCC_USE_VERSION_13,g' toolchain/gcc/Config.in
           pushd "target/linux/qualcommax/patches-6.1" || exit
-          cp -f $GITHUB_WORKSPACE/patch/ipq6000/* .
+          if [[ ${{ matrix.cp_status }} == true ]]; then
+            cp -f $GITHUB_WORKSPACE/patch/ipq6000/* .
+          fi       
           sed -i 's/2000000000/${{ matrix.cp }}/' 0154-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
           sed -i 's/0x3/0xf/' 0154-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
           sed -i 's/0x1/0xf/' 0154-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
@@ -157,7 +165,7 @@ jobs:
           sed -i '/client_max_body_size/a\\tserver_names_hash_bucket_size 128;' feeds/packages/net/nginx-util/files/uci.conf.template
           sed -i '/ubus_parallel_req/a\        ubus_script_timeout 600;' feeds/packages/net/nginx/files-luci-support/60_nginx-luci-support
           sed -ri "/luci-webui.socket/i\ \t\tuwsgi_send_timeout 600\;\n\t\tuwsgi_connect_timeout 600\;\n\t\tuwsgi_read_timeout 600\;" feeds/packages/net/nginx/files-luci-support/luci.locations
-          sed -ri "/luci-cgi_io.socket/i\ \t\tuwsgi_send_timeout 600\;\n\t\tuwsgi_connect_timeout 600\;\n\t\tuwsgi_read_timeout 600\;" feeds/packages/net/nginx/files-luci-support/luci.locations          
+          sed -ri "/luci-cgi_io.socket/i\ \t\tuwsgi_send_timeout 600\;\n\t\tuwsgi_connect_timeout 600\;\n\t\tuwsgi_read_timeout 600\;" feeds/packages/net/nginx/files-luci-support/luci.locations
 
       - name: Download DL Package
         run: |
@@ -202,12 +210,14 @@ jobs:
           tar -zcf Packages.tar.gz packages
           rm -rf packages feeds.buildinfo version.buildinfo
           echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
-          wget https://github.com/hx210/nomino/releases/download/dev/nomino-linux-x86_64.zst
-          sudo apt-get install -y zstd
-          zstd -d --rm nomino-linux-x86_64.zst
-          chmod +x nomino-linux-x86_64
-          sudo mv -f "nomino-linux-x86_64" /usr/local/bin/nomino
-          nomino "^(.*)" "${{ matrix.cp }}_{}"
+          if [[ ${{ matrix.cp_status }} == true ]]; then
+            wget https://github.com/hx210/nomino/releases/download/dev/nomino-linux-x86_64.zst
+            sudo apt-get install -y zstd
+            zstd -d --rm nomino-linux-x86_64.zst
+            chmod +x nomino-linux-x86_64
+            sudo mv -f "nomino-linux-x86_64" /usr/local/bin/nomino
+            nomino "^(.*)" "${{ matrix.cp }}_{}"
+          fi
 
       - name: Upload Firmware To Artifact
         if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE != 'true'
