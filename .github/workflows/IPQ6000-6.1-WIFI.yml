@@ -34,6 +34,7 @@ jobs:
           - true
         ex_patch:
           - true
+          - false
         cp:
           - 2200000000
           - 2100000000
