@@ -32,6 +32,8 @@ jobs:
       matrix:
         cp_status:
           - true
+        ex_patch:
+          - true
         cp:
           - 2200000000
           - 2100000000
@@ -84,8 +86,11 @@ jobs:
           df -hT $GITHUB_WORKSPACE
           git clone $REPO_URL -b $REPO_BRANCH openwrt
           cd openwrt
-          wget https://github.com/breeze303/ipq60xx-6.1/commit/d59d3a4948ea0526fc7a5d3952c6d9fc1c06c8eb.patch -O 1.patch
-          git apply 1.patch
+          if [[ ${{ matrix.ex_patch }} == true ]]; then
+            wget https://github.com/breeze303/ipq60xx-6.1/commit/d59d3a4948ea0526fc7a5d3952c6d9fc1c06c8eb.patch -O 1.patch
+            git apply 1.patch || exit 1
+            echo "应用补丁成功"
+          fi
           echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
           VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
           echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
@@ -217,6 +222,9 @@ jobs:
             chmod +x nomino-linux-x86_64
             sudo mv -f "nomino-linux-x86_64" /usr/local/bin/nomino
             nomino "^(.*)" "${{ matrix.cp }}_{}"
+          fi
+          if [[ ${{ matrix.ex_patch }} == true ]]; then
+            echo "FIRMWARE_TAG=ORANGE" >> $GITHUB_ENV
           fi
 
       - name: Upload Firmware To Artifact
