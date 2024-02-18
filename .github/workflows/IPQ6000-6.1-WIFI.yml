@@ -43,6 +43,7 @@ jobs:
           - 1850000000
         include:
           - cp_status: false
+            ex_patch: false
 
     steps:
       - name: Check Server Performance
