@@ -157,6 +157,7 @@ jobs:
           pushd "target/linux/qualcommax/patches-6.1" || exit
           if [[ ${{ matrix.cp_status }} == true ]]; then
             cp -f $GITHUB_WORKSPACE/patch/ipq6000/* .
+            rm 0910-arm64-dts-qcom-ipq6018-change-voltage-to-perf-levels.patch
           fi       
           sed -i 's/2000000000/${{ matrix.cp }}/' 0054-v6.8-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
           cat 0054-v6.8-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
