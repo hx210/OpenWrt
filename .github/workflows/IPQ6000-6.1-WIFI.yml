@@ -35,14 +35,12 @@ jobs:
         ex_patch:
           - false
         cp:
-          - 2200000000
-          - 2100000000
           - 2000000000
-          - 1900000000
-          - 1850000000
         include:
           - cp_status: false
             ex_patch: false
+            REPO_URL: https://github.com/breeze303/ipq60xx-6.1
+            REPO_BRANCH: ipq60xx-wifi
 
     steps:
       - name: Check Server Performance
@@ -58,6 +56,12 @@ jobs:
           echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
           echo "--------------------------硬盘信息--------------------------"
           echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
+
+      - name: 初始化变量
+        if: matrix.REPO_URL != '' && matrix.REPO_BRANCH != ''
+        run: |
+          echo "REPO_URL=${{ matrix.REPO_URL }}" >> $GITHUB_ENV
+          echo "REPO_BRANCH=${{ matrix.REPO_BRANCH }}" >> $GITHUB_ENV
 
       - name: Initialization Environment
         env:
@@ -158,9 +162,9 @@ jobs:
           if [[ ${{ matrix.cp_status }} == true ]]; then
             cp -f $GITHUB_WORKSPACE/patch/ipq6000/* .
             rm 0910-arm64-dts-qcom-ipq6018-change-voltage-to-perf-levels.patch
+            sed -i 's/2000000000/${{ matrix.cp }}/' 0054-v6.8-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
+            cat 0054-v6.8-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch            
           fi       
-          sed -i 's/2000000000/${{ matrix.cp }}/' 0054-v6.8-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
-          cat 0054-v6.8-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
           popd || exit
           # Nginx
           sed -i "s/large_client_header_buffers 2 1k/large_client_header_buffers 4 32k/g" feeds/packages/net/nginx-util/files/uci.conf.template
