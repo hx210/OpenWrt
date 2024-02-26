@@ -2,8 +2,6 @@ name: IPQ6000-6.1-WIFI alpine
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: 0 19 * * *
 
 env:
   REPO_URL: https://github.com/JiaY-shi/openwrt
