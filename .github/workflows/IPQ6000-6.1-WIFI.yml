@@ -31,7 +31,7 @@ jobs:
       fail-fast: false
       matrix:
         cp_status:
-          - true
+          - false
         ex_patch:
           - false
         cp:
@@ -40,7 +40,7 @@ jobs:
           - cp_status: false
             ex_patch: false
             REPO_URL: https://github.com/breeze303/ipq60xx-6.1
-            REPO_BRANCH: ipq60xx-wifi
+            REPO_BRANCH: main
 
     steps:
       - name: Check Server Performance
