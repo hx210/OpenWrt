@@ -41,6 +41,10 @@ jobs:
             ex_patch: false
             REPO_URL: https://github.com/breeze303/ipq60xx-6.1
             REPO_BRANCH: main
+          - cp_status: false
+            ex_patch: false
+            REPO_URL: https://github.com/JiaY-shi/openwrt
+            REPO_BRANCH: ipq60xx-devel_6.6_nss
 
     steps:
       - name: Check Server Performance
