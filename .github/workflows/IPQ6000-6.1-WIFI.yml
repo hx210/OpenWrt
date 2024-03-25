@@ -158,7 +158,7 @@ jobs:
           sed -i 's,gc-sections,gc-sections no-lto,g' feeds/packages/net/nginx/Makefile
           # libsodium
           sed -i 's,no-mips16,no-mips16 no-lto,g' feeds/packages/libs/libsodium/Makefile
-          sed -i 's,default GCC_USE_VERSION_12,default GCC_USE_VERSION_13,g' toolchain/gcc/Config.in
+          #sed -i 's,default GCC_USE_VERSION_12,default GCC_USE_VERSION_13,g' toolchain/gcc/Config.in
           pushd "target/linux/qualcommax/patches-6.1" || exit
           if [[ ${{ matrix.cp_status }} == true ]]; then
             cp -f $GITHUB_WORKSPACE/patch/ipq6000/* .
