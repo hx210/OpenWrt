@@ -1,4 +1,4 @@
-name: IPQ6000-6.1-WIFI
+name: IPQ6000-6.6-test
 
 on:
   workflow_dispatch:
