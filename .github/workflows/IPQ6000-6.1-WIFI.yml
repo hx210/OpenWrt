@@ -10,7 +10,14 @@ on:
         default: false
   schedule:
     - cron: 0 19 * * *
-
+  push:
+    branches:
+      - "main"
+    tags:
+      - v*
+    paths:
+      - ".github/workflows/IPQ6000-6.1-WIFI.yml"
+      - "configs/dest.config"
 env:
   REPO_URL: https://github.com/JiaY-shi/openwrt
   REPO_BRANCH: ipq60xx-devel_6.6_nss
