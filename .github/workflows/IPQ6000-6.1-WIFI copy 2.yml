@@ -1,4 +1,4 @@
-name: IPQ6000-6.6-WIFI
+name: IPQ6000-6.1-WIFI
 
 on:
   workflow_dispatch:
@@ -46,7 +46,7 @@ jobs:
         include:
           - cp_status: false
             ex_patch: false
-            REPO_URL: https://github.com/breeze303/ipq60xx-6.6
+            REPO_URL: https://github.com/breeze303/ipq60xx-6.1
             REPO_BRANCH: main
 
     steps:
@@ -123,7 +123,6 @@ jobs:
       - name: Generate Variables
         run: |
           cp $CONFIG_FILE $OPENWRT_PATH/.config
-          cp -f $FEEDS_CONF $OPENWRT_PATH/feeds.conf.default
           cd $OPENWRT_PATH
           make defconfig
           SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
