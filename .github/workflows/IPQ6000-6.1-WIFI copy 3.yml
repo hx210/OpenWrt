@@ -16,7 +16,7 @@ on:
     tags:
       - v*
     paths:
-      - ".github/workflows/IPQ6000-6.1-WIFI.yml"
+      - ".github/workflows/IPQ6000-6.1-WIFI copy 3.yml"
       - "configs/dest.config"
 env:
   REPO_URL: https://github.com/JiaY-shi/openwrt
@@ -46,7 +46,7 @@ jobs:
         include:
           - cp_status: false
             ex_patch: false
-            REPO_URL: https://github.com/breeze303/ipq60xx-6.1
+            REPO_URL: https://github.com/breeze303/ipq60xx-6.6
             REPO_BRANCH: test
 
     steps:
@@ -122,7 +122,7 @@ jobs:
 
       - name: Generate Variables
         run: |
-          cp $CONFIG_FILE $OPENWRT_PATH/.config
+          cp -f $CONFIG_FILE $OPENWRT_PATH/.config
           cd $OPENWRT_PATH
           make defconfig
           SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
@@ -146,10 +146,18 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
+      - name: Apply patches
+        run: |
+          git config --global user.name "OpenWrt Builder"
+          git config --global user.email "buster-openwrt@ovvo.uk"
+          cd $OPENWRT_PATH/feeds/luci
+          wget https://raw.githubusercontent.com/openwrt-ipq60xx/patches/main/feeds/luci/0001-show-soc-status-on-luci.patch
+          git am 0001-show-soc-status-on-luci.patch
+
       - name: Load Custom Configuration
         run: |
           [ -e files ] && mv files $OPENWRT_PATH/files
-          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_PATH/.config
+          [ -e $CONFIG_FILE ] && mv -f $CONFIG_FILE $OPENWRT_PATH/.config
           chmod +x $GITHUB_WORKSPACE/scripts/*.sh
           chmod +x $DIY_SCRIPT
           cd $OPENWRT_PATH
