@@ -87,6 +87,13 @@ jobs:
           echo "REPO_URL=${{ matrix.REPO_URL }}" >> $GITHUB_ENV
           echo "REPO_BRANCH=${{ matrix.REPO_BRANCH }}" >> $GITHUB_ENV
 
+      - name: root权限编译
+        run: |
+          export FORCE_UNSAFE_CONFIGURE=1
+          if [[ $(id -u) -eq 0 ]]; then
+              echo "FORCE_UNSAFE_CONFIGURE=$FORCE_UNSAFE_CONFIGURE" >>$GITHUB_ENV
+          fi
+
       - name: Clone Source Code
         run: |
           df -hT $GITHUB_WORKSPACE
