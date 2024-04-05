@@ -132,7 +132,7 @@ jobs:
         uses: HiGarfield/cachewrtbuild@main
         with:
           ccache: false
-          mixkey: ${{ env.SOURCE_REPO }}-${{ env.REPO_BRANCH }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
+          mixkey: A_${{ env.SOURCE_REPO }}-${{ env.REPO_BRANCH }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
           prefix: ${{ env.OPENWRT_PATH }}
 
       - name: Install Feeds
@@ -156,7 +156,7 @@ jobs:
           chmod +x $GITHUB_WORKSPACE/scripts/*.sh
           chmod +x $DIY_SCRIPT
           cd $OPENWRT_PATH
-          cp -f patch/rules.mk .
+          cp -f $GITHUB_WORKSPACE/patch/rules.mk .
           #sed -i 's/1608000000/1800000000/' target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6018-cpufreq.dtsi
           python3 $GITHUB_WORKSPACE/scripts/xiugai.py
           sed -i 's/Os/O3 -Wl,--gc-sections/g' include/target.mk
