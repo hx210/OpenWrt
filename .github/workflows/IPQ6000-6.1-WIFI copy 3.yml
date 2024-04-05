@@ -1,0 +1,265 @@
+name: IPQ6000-6.6-WIFI a
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: "Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)"
+        required: false
+        default: false
+  schedule:
+    - cron: 0 19 * * *
+  push:
+    branches:
+      - "main"
+    tags:
+      - v*
+    paths:
+      - ".github/workflows/IPQ6000-6.1-WIFI copy 3.yml"
+      - "configs/dest.config"
+env:
+  REPO_URL: https://github.com/JiaY-shi/openwrt
+  REPO_BRANCH: ipq60xx-devel_6.6_nss
+  FEEDS_CONF: feeds/ipq6000-6.1.default
+  CONFIG_FILE: configs/dest.config
+  DIY_SCRIPT: diy-script.sh
+  CLASH_KERNEL: amd64
+  CACHE_TOOLCHAIN: true
+  UPLOAD_BIN_DIR: false
+  FIRMWARE_RELEASE: true
+  FIRMWARE_TAG: IPQ6000-6.6-AWIFI
+  TZ: Asia/Shanghai
+
+jobs:
+  Build:
+    runs-on: ubuntu-22.04
+    container:
+      image: alpine:latest
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        cp_status:
+          - false
+        ex_patch:
+          - false
+        cp:
+          - 2000000000
+        include:
+          - cp_status: false
+            ex_patch: false
+            REPO_URL: https://github.com/breeze303/ipq60xx-6.6
+            REPO_BRANCH: main
+
+    steps:
+      - name: Initialization Environment
+        shell: sh
+        run: |
+          apk add argp-standalone asciidoc bash bc binutils bzip2 cdrkit coreutils \
+          diffutils elfutils-dev findutils flex musl-fts-dev g++ gawk gcc gettext git \
+          grep gzip intltool libxslt linux-headers make musl-libintl musl-obstack-dev \
+          ncurses-dev openssl-dev patch perl python3-dev rsync tar \
+          unzip util-linux wget zlib-dev sudo pahole aria2 libc-dev  	gcc-cross-embedded
+
+      - name: Check Server Performance
+        run: |
+          echo "警告⚠"
+          echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
+          echo -e "已知CPU型号（降序）：7763，8370C，8272CL，8171M，E5-2673 \n"
+          echo "--------------------------CPU信息--------------------------"
+          echo "CPU物理数量：$(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"
+          echo -e "CPU核心信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+          echo "--------------------------内存信息--------------------------"
+          echo "已安装内存详细信息："
+          echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
+          echo "--------------------------硬盘信息--------------------------"
+          echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
+
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Clone Source Code
+        run: |
+          df -hT $GITHUB_WORKSPACE
+          git clone $REPO_URL -b $REPO_BRANCH openwrt
+          cd openwrt
+          if [[ ${{ matrix.ex_patch }} == true ]]; then
+            wget https://github.com/breeze303/ipq60xx-6.1/commit/d59d3a4948ea0526fc7a5d3952c6d9fc1c06c8eb.patch -O 1.patch
+            git apply 1.patch || exit 1
+            echo "应用补丁成功"
+          fi
+          echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+          VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
+          echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
+          REPLACE_REPO="https://github.com/openwrt/openwrt"
+          REPO_REPO_PATH="$PWD/RP_REPO"
+          git clone --depth 1 ${REPLACE_REPO} "${REPO_REPO_PATH}"
+          REPLACE_PATH_LIST="package/system package/network/config package/firmware/linux-firmware package/utils toolchain tools package/base-files"
+          SOURCE_PATH=$PWD
+          for i in ${REPLACE_PATH_LIST}; do
+              echo "${i}"
+              if [ -d "${SOURCE_PATH}/${i}" ]; then
+                  rm -rf "${SOURCE_PATH:?}/${i}" && mkdir "${SOURCE_PATH:?}/${i}" && mv "${REPO_REPO_PATH}/${i}/"* "${SOURCE_PATH}/${i}"
+              fi
+          done
+          cat "${SOURCE_PATH}/package/network/config/netifd/Makefile"
+          rm -rf "${REPO_REPO_PATH}"
+
+      - name: Generate Variables
+        run: |
+          cp $CONFIG_FILE $OPENWRT_PATH/.config
+          cp -f $FEEDS_CONF $OPENWRT_PATH/feeds.conf.default
+          cd $OPENWRT_PATH
+          make defconfig
+          SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
+          echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
+          DEVICE_TARGET=$(cat .config | grep CONFIG_TARGET_BOARD | awk -F '"' '{print $2}')
+          echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
+          DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}')
+          echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
+
+      - name: Cache Toolchain
+        if: env.CACHE_TOOLCHAIN == 'true'
+        uses: HiGarfield/cachewrtbuild@main
+        with:
+          ccache: false
+          mixkey: ${{ env.SOURCE_REPO }}-${{ env.REPO_BRANCH }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
+          prefix: ${{ env.OPENWRT_PATH }}
+
+      - name: Install Feeds
+        run: |
+          cd $OPENWRT_PATH
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Apply patches
+        run: |
+          git config --global user.name "OpenWrt Builder"
+          git config --global user.email "buster-openwrt@ovvo.uk"
+          cd $OPENWRT_PATH/feeds/luci
+          wget https://raw.githubusercontent.com/openwrt-ipq60xx/patches/main/feeds/luci/0001-show-soc-status-on-luci.patch
+          git am 0001-show-soc-status-on-luci.patch
+
+      - name: Load Custom Configuration
+        run: |
+          [ -e files ] && mv files $OPENWRT_PATH/files
+          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_PATH/.config
+          chmod +x $GITHUB_WORKSPACE/scripts/*.sh
+          chmod +x $DIY_SCRIPT
+          cd $OPENWRT_PATH
+          cp -f patch/rules.mk .
+          #sed -i 's/1608000000/1800000000/' target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6018-cpufreq.dtsi
+          python3 $GITHUB_WORKSPACE/scripts/xiugai.py
+          sed -i 's/Os/O3 -Wl,--gc-sections/g' include/target.mk
+          #LTO/GC
+          # Grub 2
+          sed -i 's,no-lto,no-lto no-gc-sections,g' package/boot/grub2/Makefile
+          # openssl disable LTO
+          sed -i 's,no-mips16 gc-sections,no-mips16 gc-sections no-lto,g' package/libs/openssl/Makefile
+          # nginx
+          sed -i 's,gc-sections,gc-sections no-lto,g' feeds/packages/net/nginx/Makefile
+          # libsodium
+          sed -i 's,no-mips16,no-mips16 no-lto,g' feeds/packages/libs/libsodium/Makefile
+          sed -i 's,default GCC_USE_VERSION_12,default GCC_USE_VERSION_13,g' toolchain/gcc/Config.in
+          pushd "target/linux/qualcommax/patches-6.1" || exit
+          if [[ ${{ matrix.cp_status }} == true ]]; then
+            cp -f $GITHUB_WORKSPACE/patch/ipq6000/* .
+            rm 0910-arm64-dts-qcom-ipq6018-change-voltage-to-perf-levels.patch
+            sed -i 's/2000000000/${{ matrix.cp }}/' 0054-v6.8-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch
+            cat 0054-v6.8-arm64-dts-qcom-ipq6018-use-CPUFreq-NVMEM.patch            
+          fi       
+          popd || exit
+          # Nginx
+          sed -i "s/large_client_header_buffers 2 1k/large_client_header_buffers 4 32k/g" feeds/packages/net/nginx-util/files/uci.conf.template
+          sed -i "s/client_max_body_size 128M/client_max_body_size 2048M/g" feeds/packages/net/nginx-util/files/uci.conf.template
+          sed -i '/client_max_body_size/a\\tclient_body_buffer_size 8192M;' feeds/packages/net/nginx-util/files/uci.conf.template
+          sed -i '/client_max_body_size/a\\tserver_names_hash_bucket_size 128;' feeds/packages/net/nginx-util/files/uci.conf.template
+          sed -i '/ubus_parallel_req/a\        ubus_script_timeout 600;' feeds/packages/net/nginx/files-luci-support/60_nginx-luci-support
+          sed -ri "/luci-webui.socket/i\ \t\tuwsgi_send_timeout 600\;\n\t\tuwsgi_connect_timeout 600\;\n\t\tuwsgi_read_timeout 600\;" feeds/packages/net/nginx/files-luci-support/luci.locations
+          sed -ri "/luci-cgi_io.socket/i\ \t\tuwsgi_send_timeout 600\;\n\t\tuwsgi_connect_timeout 600\;\n\t\tuwsgi_read_timeout 600\;" feeds/packages/net/nginx/files-luci-support/luci.locations
+
+      - name: Download DL Package
+        run: |
+          cd $OPENWRT_PATH
+          make defconfig
+          make download -j8
+          find dl -size -1024c -exec ls -l {} \;
+          find dl -size -1024c -exec rm -f {} \;
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+
+      - name: Compile Firmware
+        id: compile
+        run: |
+          cd $OPENWRT_PATH
+          echo -e "$(nproc) thread compile"
+          make -j$(nproc) || make -j1 || make -j1 V=s
+          echo "status=success" >> $GITHUB_OUTPUT
+          echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
+          echo "FILE_DATE=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
+
+      - name: Check Space Usage
+        if: (!cancelled())
+        run: df -hT
+
+      - name: Upload Bin Directory
+        if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ env.SOURCE_REPO }}-bin-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.FILE_DATE }}
+          path: ${{ env.OPENWRT_PATH }}/bin
+
+      - name: Organize Files
+        if: steps.compile.outputs.status == 'success'
+        run: |
+          cd $OPENWRT_PATH/bin/targets/*/*
+          cat sha256sums
+          cp $OPENWRT_PATH/.config build.config
+          mv -f $OPENWRT_PATH/bin/packages/*/*/*.ipk packages
+          tar -zcf Packages.tar.gz packages
+          rm -rf packages feeds.buildinfo version.buildinfo
+          echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
+          if [[ ${{ matrix.cp_status }} == true ]]; then
+            wget https://github.com/hx210/nomino/releases/download/dev/nomino-linux-x86_64.zst
+            sudo apt-get install -y zstd
+            zstd -d --rm nomino-linux-x86_64.zst
+            chmod +x nomino-linux-x86_64
+            sudo mv -f "nomino-linux-x86_64" /usr/local/bin/nomino
+            nomino "^(.*)" "${{ matrix.cp }}_{}"
+          fi
+          if [[ ${{ matrix.ex_patch }} == true ]]; then
+            echo "FIRMWARE_TAG=ORANGE" >> $GITHUB_ENV
+          fi
+
+      - name: Upload Firmware To Artifact
+        if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE != 'true'
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ env.SOURCE_REPO }}-firmware-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.FILE_DATE }}
+          path: ${{ env.FIRMWARE_PATH }}
+
+      - name: Upload Firmware To Release
+        if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE == 'true'
+        uses: ncipollo/release-action@v1
+        with:
+          name: R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }}
+          allowUpdates: true
+          tag: ${{ env.FIRMWARE_TAG }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: ${{ env.FIRMWARE_PATH }}/*
+          body: |
+            **This is OpenWrt Firmware for ${{ env.FIRMWARE_TAG }}**
+            ### 📒 固件信息
+            - 💻 这是 ${{ env.FIRMWARE_TAG }} 平台使用的 OpenWrt 固件
+            - ⚽ 固件源码: ${{ env.REPO_URL }}
+            - 💝 源码分支: ${{ env.REPO_BRANCH }}
+            - 🌐 默认地址: 192.168.1.1
+            - 🔑 默认密码: password
+            ### 🧊 固件版本
+            - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
+            - ${{ env.VERSION_INFO }}
