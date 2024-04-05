@@ -45,7 +45,6 @@ jobs:
         cp_status:
           - false
         ex_patch:
-          - false
           - true
         cp:
           - 2000000000
@@ -154,9 +153,7 @@ jobs:
           chmod +x $GITHUB_WORKSPACE/scripts/*.sh
           chmod +x $DIY_SCRIPT
           cd $OPENWRT_PATH
-          if [[ ${{ matrix.ex_patch }} == true ]]; then
-            cp -f $GITHUB_WORKSPACE/patch/rules.mk .
-          fi
+          cp -f $GITHUB_WORKSPACE/patch/rules.mk .
           #sed -i 's/1608000000/1800000000/' target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6018-cpufreq.dtsi
           python3 $GITHUB_WORKSPACE/scripts/xiugai.py
           sed -i 's/Os/O3 -Wl,--gc-sections/g' include/target.mk
@@ -198,6 +195,18 @@ jobs:
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+
+      - name: Compile Tools
+        run: |
+          cd $OPENWRT_ROOT_PATH
+          echo -e "$(nproc) thread compile"
+          make tools/compile -j$(nproc) || make tools/compile -j1 V=s
+
+      - name: Compile Toolchain
+        run: |
+          cd $OPENWRT_ROOT_PATH
+          echo -e "$(nproc) thread compile"
+          make toolchain/compile -j$(nproc) || make toolchain/compile -j1 V=s
 
       - name: Compile Firmware
         id: compile
