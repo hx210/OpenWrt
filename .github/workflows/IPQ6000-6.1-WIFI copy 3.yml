@@ -198,13 +198,13 @@ jobs:
 
       - name: Compile Tools
         run: |
-          cd $OPENWRT_ROOT_PATH
+          cd $OPENWRT_PATH
           echo -e "$(nproc) thread compile"
           make tools/compile -j$(nproc) || make tools/compile -j1 V=s
 
       - name: Compile Toolchain
         run: |
-          cd $OPENWRT_ROOT_PATH
+          cd $OPENWRT_PATH
           echo -e "$(nproc) thread compile"
           make toolchain/compile -j$(nproc) || make toolchain/compile -j1 V=s
 
