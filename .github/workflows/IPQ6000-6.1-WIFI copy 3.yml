@@ -19,8 +19,8 @@ on:
       - ".github/workflows/IPQ6000-6.1-WIFI copy 3.yml"
       - "configs/dest.config"
 env:
-  REPO_URL: https://github.com/JiaY-shi/openwrt
-  REPO_BRANCH: ipq60xx-devel_6.6_nss
+  REPO_URL: https://github.com/breeze303/ipq60xx-6.6
+  REPO_BRANCH: main
   FEEDS_CONF: feeds/ipq6000-6.1.default
   CONFIG_FILE: configs/dest.config
   DIY_SCRIPT: diy-script.sh
@@ -46,13 +46,9 @@ jobs:
           - false
         ex_patch:
           - false
+          - true
         cp:
           - 2000000000
-        include:
-          - cp_status: false
-            ex_patch: false
-            REPO_URL: https://github.com/breeze303/ipq60xx-6.6
-            REPO_BRANCH: main
 
     steps:
       - name: Initialization Environment
@@ -99,11 +95,6 @@ jobs:
           df -hT $GITHUB_WORKSPACE
           git clone $REPO_URL -b $REPO_BRANCH openwrt
           cd openwrt
-          if [[ ${{ matrix.ex_patch }} == true ]]; then
-            wget https://github.com/breeze303/ipq60xx-6.1/commit/d59d3a4948ea0526fc7a5d3952c6d9fc1c06c8eb.patch -O 1.patch
-            git apply 1.patch || exit 1
-            echo "应用补丁成功"
-          fi
           echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
           VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
           echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
@@ -163,7 +154,9 @@ jobs:
           chmod +x $GITHUB_WORKSPACE/scripts/*.sh
           chmod +x $DIY_SCRIPT
           cd $OPENWRT_PATH
-          cp -f $GITHUB_WORKSPACE/patch/rules.mk .
+          if [[ ${{ matrix.ex_patch }} == true ]]; then
+            cp -f $GITHUB_WORKSPACE/patch/rules.mk .
+          fi
           #sed -i 's/1608000000/1800000000/' target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6018-cpufreq.dtsi
           python3 $GITHUB_WORKSPACE/scripts/xiugai.py
           sed -i 's/Os/O3 -Wl,--gc-sections/g' include/target.mk
@@ -244,9 +237,6 @@ jobs:
             chmod +x nomino-linux-x86_64
             sudo mv -f "nomino-linux-x86_64" /usr/local/bin/nomino
             nomino "^(.*)" "${{ matrix.cp }}_{}"
-          fi
-          if [[ ${{ matrix.ex_patch }} == true ]]; then
-            echo "FIRMWARE_TAG=ORANGE" >> $GITHUB_ENV
           fi
 
       - name: Upload Firmware To Artifact
